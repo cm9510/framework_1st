@@ -7,11 +7,11 @@ return [
 	// 主机
 	'host' => '127.0.0.1',
 	// 数据库名称
-	'dbname' => 'bak',
+	'dbname' => 'name',
 	// 数据库端口
-	'port' => '33306',
+	'port' => '3306',
 	// 数据库用户名
 	'user' => 'root',
 	// 数据库密码
-	'password' => 'Qq!@#123qwe',
+	'password' => '123456',
 ];
