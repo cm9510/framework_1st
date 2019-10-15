@@ -24,7 +24,7 @@ class Log
 	// Write log to doc txt.
 	public function notice(string $text)
 	{
-		$logFile = __DIR__.'/../../Logs/log'.date('Ymd').'.txt';
+		$logFile = __DIR__.'/../../Storage/logs'.date('Ymd').'.txt';
 		if(!file_exists($logFile)){
 			$file = fopen($logFile, 'w');
 		}else{
