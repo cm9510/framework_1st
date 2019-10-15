@@ -7,6 +7,8 @@ class AutoLoader
 {
 	private function __construct(){}
 
+	private function __clone(){}
+
 	static protected $mvcMap = [
 		'App' => __DIR__.'/../Application',
 		'Controller' => __DIR__.'/../Application/Controller',

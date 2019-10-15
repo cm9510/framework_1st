@@ -30,3 +30,13 @@ if(!function_exists('view')){
 		return View::show($tpl);
 	}
 }
+if(!function_exists('dd')){
+	/**
+	* print data by format
+	*/
+	function dd($dump){
+		echo "<pre>";
+		var_dump($dump);
+		exit;
+	}
+}

@@ -18,12 +18,11 @@ class Index extends Controller
 
 	public function test()
 	{
-		echo '<pre>';
+		dd(Config::get('app'));
 		// $request = Request::instance();
 		// $id = $request->input(['sd']);
 		// var_dump($id['sd']);
 		// Log::notice('466');
-		var_dump(Config::get('app'));	
 	}
 }
 

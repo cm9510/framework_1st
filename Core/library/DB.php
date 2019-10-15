@@ -2,6 +2,7 @@
 namespace Core;
 
 use Core\{Config, Log};
+
 /**
  * database class
  */
@@ -15,7 +16,7 @@ class DB
 	// PDO object
 	protected $dbh;
 
-	// finally sql to get
+	// final sql string
 	protected $getSql = '';
 
 	// where condition
@@ -45,12 +46,14 @@ class DB
 		try{
 			$this->dbh = new PDO('mysql:host='.$host.';dbname='.$dbname.';port='.$port,$user,$password);
 			$this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		}catch(PDOException $e){
+		}catch(\PDOException $e){
 			Log::instance()->notice($e->getMessage());
 			exit($e->getMessage());
 		}
 		return $this;
 	}
+
+	private function __clone(){}
 
 	// 单例出口
 	public static function instance()
@@ -72,13 +75,9 @@ class DB
 	// select，返回多条，二维数组
 	public function select():array
 	{
-		$finalSql = 'SELECT'.$this->cols.'FROM'.
-					$this->table.
-					$this->where.
-					$this->orderBy.
-					$this->limit;
+		$finalSql = 'SELECT' . $this->cols . 'FROM' . $this->table . $this->where .
+					$this->orderBy . $this->limit;
 		$this->getSql = $finalSql;
-		// echo $finalSql.'<br>'; //die;
 		$result = $this->dbh->query($finalSql);
 		$result = $result->fetchAll(PDO::FETCH_ASSOC);
 		return $result ? $result : [];
@@ -89,8 +88,7 @@ class DB
 	public function insert(array $arr)
 	{
 		if(!is_array($arr)){
-			throw new Exception("argument type for array.", 1);
-			return false;
+			return '插入数据必须是数组.';
 		}
 
 		$columns = '';
@@ -108,7 +106,7 @@ class DB
 		try {
 			$row = $this->dbh->exec($finalSql);
 			return $row ? $row : 0;
-		} catch (PDOException $e) {
+		} catch (\PDOException $e) {
 			Log::instance()->notice($e->getMessage());
 			return false;
 		}
@@ -118,11 +116,9 @@ class DB
 	public function insertAll(array $arr)
 	{
 		if(!is_array($arr)){
-			throw new Exception("argument type for array.", 1);
-			return false;
+			return '插入数据必须是数组.';
 		}elseif(!is_array($arr[0])){
-			throw new Exception("argument type for array.", 1);
-			return false;
+			return '插入数据格式错误.';
 		}
 
 		$columns = '';
@@ -157,8 +153,7 @@ class DB
 	public function update(array $arr)
 	{
 		if(!is_array($arr)){
-			throw new Exception("argument type for array.", 1);
-			return false;
+			return '数据格式必须是数组.';
 		}
 
 		$col_val = '';
@@ -168,7 +163,6 @@ class DB
 		$col_val = trim($col_val,',');
 
 		$finalSql = 'UPDATE'.$this->table.'SET'.$col_val.$this->where;
-		echo $finalSql;// die;
 		$this->getSql = $finalSql;
 
 		try {
@@ -176,7 +170,7 @@ class DB
 			return $row;
 		} catch (PDOException $e) {
 			Log::instance()->notice($e->getMessage());
-			return false;
+			return $e->getMessage();
 		}
 	}
 
@@ -185,8 +179,7 @@ class DB
 	public function delete()
 	{
 		if(func_num_args() > 1){
-			throw new Exception("too many parameters.", 1);
-			return false;
+			return '参数错误.';
 		}
 		if(func_num_args() === 0){
 			$finalSql = 'DELETE FROM'.$this->table.$this->where;
@@ -198,9 +191,9 @@ class DB
 		try{
 			$row = $this->dbh->query($finalSql);
 			return $row ? $row->rowCount() : 0;
-		}catch(PDOException $e){
+		}catch(\PDOException $e){
 			Log::instance()->notice($e->getMessage());
-			return false;
+			return $e->getMessage();
 		}
 	}
 
@@ -222,36 +215,38 @@ class DB
 	// where条件
 	public function where()
 	{
-		if(func_num_args() === 0){
-			throw new Exception("missing arguments.", 1);
-			return false;
-		}
-
-		// 多条件数组
-		if(func_num_args() === 1 && !is_array(func_get_arg(0))){
-			throw new Exception("arguments type error, incorect for array.", 1);
-			return false;
-		}elseif(func_num_args() === 1 && !is_array(func_get_arg(0)[0])){
-			throw new Exception("arguments type error, incorect for array.", 1);
-			return false;
-		}elseif(func_num_args() === 1 && is_array(func_get_arg(0))){
-			foreach (func_get_arg(0) as $v) {
-				$this->where .= ' `'.$v[0].'` '.$v[1].''.$v[2].' and';
+		try{
+			if(func_num_args() === 0){
+				throw new Exception("Missing arguments.", 1);
 			}
-			$this->where = trim(' WHERE '.$this->where, 'and');
-		}
 
-		// 单条件
-		if(func_num_args() === 2){
-			$this->where .= ' WHERE `'.func_get_arg(0).'` = '.func_get_arg(1).' ';
-		}elseif(func_num_args() === 3){
-			$this->where .= ' WHERE `'.func_get_arg(0).'`'.func_get_arg(1).func_get_arg(2).' ';
+			// 多条件数组
+			if(func_num_args() === 1 && !is_array(func_get_arg(0))){
+				throw new Exception("arguments type error, incorect for array.", 1);
+			}elseif(func_num_args() === 1 && !is_array(func_get_arg(0)[0])){
+				throw new Exception("arguments type error, incorect for array.", 1);
+			}elseif(func_num_args() === 1 && is_array(func_get_arg(0))){
+				foreach (func_get_arg(0) as $v) {
+					$this->where .= ' `'.$v[0].'` '.$v[1].''.$v[2].' and';
+				}
+				$this->where = trim(' WHERE '.$this->where, 'and');
+			}
+
+			// 单条件
+			if(func_num_args() === 2){
+				$this->where .= ' WHERE `'.func_get_arg(0).'` = '.func_get_arg(1).' ';
+			}elseif(func_num_args() === 3){
+				$this->where .= ' WHERE `'.func_get_arg(0).'`'.func_get_arg(1).func_get_arg(2).' ';
+			}
+		}catch(\Exception $e){
+			Log::instance()->notice($e->getMessage());
+			return false;
 		}
 		return $this;
 	}
 
 	// order by排序
-	public function orderBy($col, $type = 'ASC')
+	public function orderBy(string $col, $type = 'ASC')
 	{
 		$this->orderBy = ' ORDER BY `'.$col.'` '.$type.' ';
 		return $this;
@@ -272,54 +267,14 @@ class DB
 	static public function __callStatic($method, $arguments)
 	{
 		$self = self::instance();
-		if(method_exists($self, $method)){
-			return call_user_func_array([$self, $method], $arguments);
+		try{
+			if(method_exists($self, $method)){
+				return call_user_func_array([$self, $method], $arguments);
+			}else{
+				throw new Exception('Method is not exist on static calling way.');
+			}
+		}catch(\Exception $e){
+			Log::instance()->notice($e->getMessage());
 		}
-		throw new Exception('Method is not exist on static calling way.');
 	}
 }
-
-
-
-$db = DB::instance();
-// $res = DB::table('font_credit_log')->field(['user_id','credit','type'])
-// 			->where([
-// 				['credit','>',30]
-// 			])->select();
-
-// $row = $db->table('font_credit_log')->insertAll([
-// 	[
-// 	'user_id' => 9,
-// 	'credit' => 19,
-// 	'customer_order_id' => 3,
-// 	'type' => 'abcdefg',
-// 	'status' => 1,
-// 	'create_time' => time()
-// 	],
-// 	[
-// 	'user_id' => 8,
-// 	'credit' => 18,
-// 	'customer_order_id' => 5,
-// 	'type' => 'abcdefg',
-// 	'status' => 4,
-// 	'create_time' => time()
-// 	],
-// 	[
-// 	'user_id' => 7,
-// 	'credit' => 17,
-// 	'customer_order_id' => 7,
-// 	'type' => 'abcdefg',
-// 	'status' => 7,
-// 	'create_time' => time()
-// 	],
-// ]);
-
-// $row = $db->table('font_credit_log')->where('id', 130)->update(['status'=>1,'create_time'=>time()]);
-
-$row = $db->table('font_credit_log')->delete(133);
-
-var_dump($row);
-
-
-// var_dump($res);
-echo '<hr>'.$db->getSql();

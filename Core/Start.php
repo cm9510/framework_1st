@@ -92,18 +92,18 @@ class Start
 	static private function notRegistedUrl(string $uri)
 	{
 		if($uri === '/'){
-			$module = 'App\\Controller\\'.Config::get('app.default_module');
-			$controller = $module.'\\'.Config::get('app.default_controller');
+			$module = 'App\\Controller\\' . ucfirst(Config::get('app.default_module'));
+			$controller = $module . '\\' . ucfirst(Config::get('app.default_controller'));
 			$action = Config::get('app.default_action');
 		}else{
 			$urlArr = explode('/', $uri);
-			$module = 'App\\Controller\\'.$urlArr[1];
+			$module = 'App\\Controller\\'.ucfirst($urlArr[1]);
 			$controller = isset($urlArr[2]) ?
-				(empty($urlArr[2]) ? $module.'\\'.Config::get('app.default_controller') : $module.'\\'.$urlArr[2]) :
-				$module.'\\'.Config::get('app.default_controller');
+				(empty($urlArr[2]) ? $module.'\\'.ucfirst(Config::get('app.default_controller')) : $module.'\\'.ucfirst($urlArr[2])) :
+				$module.'\\'.ucfirst(Config::get('app.default_controller'));
 
 			$action = isset($urlArr[3]) ?
-				(empty($urlArr[3]) ? Config::get('app.default_action') : $urlArr[3]) :
+				(empty($urlArr[3]) ? ucfirst(Config::get('app.default_action')) : $urlArr[3]) :
 				Config::get('app.default_action');
 		}
 		self::callFunction($controller, $action);
@@ -134,7 +134,7 @@ class Start
 				View::bind([
 					'code' => 404,
 					'title' => 'Method not found.',
-					'content' => '1.Method "'.$action.'" not found in controller '.$class.'.'
+					'content' => '1.Method "'.$action.'" not found in controller "'.get_class($class).'".'
 				]);
 				View::show('lib/error');
 				exit;

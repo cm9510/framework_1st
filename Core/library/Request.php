@@ -1,6 +1,7 @@
 <?php 
 namespace Core;
 
+use Core\Log;
 /***
  * Request builder
  */
@@ -34,6 +35,8 @@ class Request
 			$this->arguments = self::filter($this->arguments);
 		}
 	}
+
+	private function __clone(){}
 
 	/**
 	* Get only one self object.
@@ -189,9 +192,15 @@ class Request
 	static public function __callStatic($method, $arguments)
 	{
 		$self = self::instance();
-		if(method_exists($self, $method)){
-			return call_user_func_array([$self, $method], $arguments);
+		try{
+			if(method_exists($self, $method)){
+				return call_user_func_array([$self, $method], $arguments);
+			}else{
+				throw new Exception('Method is not exist on static calling way.');
+			}
+		}catch(\Exception $e){
+			Log::instance()->notice($e->getMessage());
+			return $e->getMessage();
 		}
-		throw new Exception('Method is not exist on static calling way.');
 	}
 }
