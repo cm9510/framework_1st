@@ -1,5 +1,5 @@
 <?php
-namespace Core\Sexy_mvc;
+namespace Core\sexy;
 /*
 * Model Builder
 */

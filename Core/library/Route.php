@@ -1,53 +1,74 @@
 <?php 
 namespace Core;
 
+use Core\Log;
+use Core\sexy\View;
+use Core\Common\InteralEnum;
+
 /**
- * 注册路由规则
+ * Rule of rute register
  */
 class Route
 {
-	static protected $getRule = [];
+	private function __construct(){}
 
-	// 注册get路由
-	static public function get(string $routeRule, string $appAction)
+	private function __clone(){}
+
+	private static $getRule = [];
+
+	// sign get url
+	public static function get(string $routeRule, string $appAction)
 	{
-		self::$getRule[$routeRule] = ['mca' => $appAction, 'method' => 'GET'];
+		self::$getRule[trim($routeRule)] = ['mca' => trim($appAction), 'method' => 'GET'];
+		return false;
 	}
 
-	// 注册post路由
-	static public function post(string $routeRule, string $appAction)
+	// sign post url
+	public static function post(string $routeRule, string $appAction)
 	{
-		self::$getRule[$routeRule] = ['mca' => $appAction, 'method' => 'POST'];
+		self::$getRule[trim($routeRule)] = ['mca' => trim($appAction), 'method' => 'POST'];
+		return false;
 	}
 
-	static public function check(string $rule)
+	//checkout rule has registed
+	public static function check(string $rule)
 	{
-		// 如果未注册
+		$rule = trim($rule);
+		// if not
 		if(!isset(self::$getRule[$rule])){
 			return false;
 		}
 
-		// 如果已注册
-		$appAction = self::$getRule[$rule];
-		if(strtoupper($_SERVER['REQUEST_METHOD']) != $appAction['method']){
-			throw new Exception("Request Method Error GET.", 1);
-			exit;
+		// if down
+		try{
+			$appAction = self::$getRule[$rule];
+			if(strtoupper($_SERVER['REQUEST_METHOD']) != $appAction['method']){
+				throw new Exception("Request Method Error.", 1);
+			}
+			$mca = explode('/', $appAction['mca']);
+			return ['module' => $mca[0], 'controller' => $mca[1], 'action' => $mca[2]];
+		}catch(\Exception $e){
+			Log::instance()->notice($e->getMessage());
+			View::showErr([
+				'code'=> InteralEnum::ERR_COMMON,
+				'title'=> InteralEnum::ERR_ERROR_TITLE,
+				'content'=> $e->getMessage()
+			]);
 		}
-		$mca = explode('/', $appAction['mca']);
-		return [
-			'module' => $mca[0],
-			'controller' => $mca[1],
-			'action' => $mca[2]
-		];
 	}
 
-	static public function __callStatic($method, $arguments)
+	public static function __callStatic($method, $arguments)
 	{
 		$self = self::instance();
 		if(method_exists($self, $method)){
 			return call_user_func_array([$self, $method], $arguments);
+		}else{
+			View::showErr([
+				'code'=> InteralEnum::METHOD_NOT_EXIST,
+				'title'=> 'Method is not exist.',
+				'content'=> 'Method is not exist on static calling way.'
+			]);
 		}
-		throw new Exception('Method is not exist on static calling way.');
 	}
 }
 

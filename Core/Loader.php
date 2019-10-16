@@ -9,26 +9,25 @@ class AutoLoader
 
 	private function __clone(){}
 
-	static protected $mvcMap = [
-		'App' => __DIR__.'/../Application',
-		'Controller' => __DIR__.'/../Application/Controller',
-		'Model' => __DIR__.'/../Application/Model',
-		'View' => __DIR__.'/../Application/View',
-		'Route' => __DIR__.'/../Route',
-		'Core' => __DIR__.'/../Core/library',
-		'' => '/'
+	protected static $mvcMap = [
+		'App' => __DIR__ . '/../Application',
+		'Route' => __DIR__ . '/../Route',
+		'Core' => __DIR__ . '/../Core/library',
+		'Core\\Common' => __DIR__ . '/../Core/common',
+		'' => __DIR__ . '/'
 	];
 
-	static public function autoload($class)
+	public static function autoload($class)
 	{
 		$top = substr($class, 0, strpos($class, '\\'));
 		$topDir = self::$mvcMap[$top];
-		$path = substr($class, strlen($top)).'.php';
-		$file = strtr($topDir.$path, '\\', '/');
+		$path = substr($class, strlen($top)) . '.php';
+		$file = strtr($topDir . $path, '\\', '/');
 
 		if(file_exists($file) && is_file($file)){
 			include_once $file;
 		}
+		return false;
 	}
 }
 spl_autoload_register('AutoLoader::autoload');

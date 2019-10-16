@@ -1,18 +1,21 @@
 <?php 
 namespace Core;
 
+use Core\Common\InternalEnum;
 /**
  * write log
  */
 class Log
 {
 	// self object
-	static private $instance = null;
+	private static $instance = null;
 
 	private function __construct(){}
 
+	private function __clone(){}
+
 	// Get self
-	static public function instance()
+	public static function instance()
 	{
 		if(self::$instance && self::$instance instanceof self){
 			return self::$instance;
@@ -34,12 +37,17 @@ class Log
 		fclose($file);
 	}
 
-	static public function __callStatic($method, $arguments)
+	public static function __callStatic($method, $arguments)
 	{
 		$self = self::instance();
 		if(method_exists($self, $method)){
 			return call_user_func_array([$self, $method], $arguments);
+		}else{
+			View::showErr([
+				'code' => InternalEnum::METHOD_NOT_EXIST,
+				'title' => 'Method not found.',
+				'content' => 'Method is not exist on static calling way.'
+			]);
 		}
-		throw new Exception('Method is not exist on static calling way.');
 	}
 }

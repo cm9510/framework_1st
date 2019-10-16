@@ -1,7 +1,7 @@
 <?php 
-namespace Core\Sexy_mvc;
+namespace Core\sexy;
 
-use Core\Sexy_mvc\View;
+use Core\sexy\View;
 /*
 * Model Builder
 */

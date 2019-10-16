@@ -2,6 +2,8 @@
 namespace Core;
 
 use Core\Log;
+use Core\sexy\View;
+
 /***
  * Request builder
  */
@@ -11,7 +13,7 @@ class Request
 	private static $instance = null;
 
 	// request data
-	private $arguments;
+	private $arguments = null;
 
 	// filter rule
 	private static $rule = [
@@ -20,10 +22,6 @@ class Request
        	"/select\b|insert\b|update\b|delete\b|drop\b|;|\"|\'|\/\*|\*|\.\.\/|\.\/|union|into|load_file|outfile|dump/is"
 	];
 
-
-	/**
-	* Initial
-	*/
 	private function __construct()
 	{
 		if($this->isGet()){
@@ -87,7 +85,7 @@ class Request
 	/**
 	* Get all arguments by any method.
 	*/
-	public function all():array
+	public function all()
 	{
 		if($this->isGet() || $thi->isPost()){
 			return $this->arguments;
@@ -100,24 +98,32 @@ class Request
 	*/
 	public function input(array $keys = [], $method = 'GET')
 	{
-		if(!is_array($keys)){
-			throw new Exception("Method 'Request->input' argument 1 type should be Array.", 1);
-			return false;
-		}
-
-		$result = [];
-		$way = strtoupper($method);
-		if(($this->isGet() && $way == 'GET') || ($this->isPost() && $way == 'POST')){
-			if(!empty($keys)){
-				foreach($keys as $key){
-					$result[trim($key)] = $this->getArgument(trim($key), '');
-				}
-			}else{
-				$result = $this->arguments;
+		try{
+			if(!is_array($keys)){
+				throw new Exception("Method 'input' argument 1 type should be Array.", 1);
 			}
-			unset($way);
+
+			$result = [];
+			$way = strtoupper($method);
+			if(($this->isGet() && $way == 'GET') || ($this->isPost() && $way == 'POST')){
+				if(!empty($keys)){
+					foreach($keys as $key){
+						$result[trim($key)] = $this->getArgument(trim($key), null);
+					}
+				}else{
+					$result = $this->arguments;
+				}
+				unset($way);
+			}
+			return $result;
+		}catch(\Exception $e){
+			Log::instance()->notice($e->getMessage());
+			View::showErr([
+				'code'=> InteralEnum::ERR_COMMON,
+				'title'=> InteralEnum::ERR_EXCEPTION_TITLE,
+				'content'=> $e->getMessage()
+			]);
 		}
-		return $result;
 	}
 
 	/**
@@ -143,7 +149,7 @@ class Request
 	}
 
 	/**
-	* Check request method is AJAX.
+	* Check request is AJAX.
 	*/
 	public function isAjax():bool
 	{
@@ -159,18 +165,27 @@ class Request
 	*/
 	protected static function filter($param)
 	{
-		if(is_array($param)){
-			foreach($param as &$item){
-				$item = self::filter($item);
+		try{
+			if(is_array($param)){
+				foreach($param as &$item){
+					$item = self::filter($item);
+				}
+				return $param;
 			}
-			return $param;
-		}
-		if(!is_string($param)){
-			return false;
-		}else{
-			$str = preg_replace(self::$rule, '', $param);
-			$str = htmlspecialchars($str);
-			return $str;
+			if(!is_string($param)){
+				throw new Exception("Paramaters is Illeagel.", 1);
+			}else{
+				$str = preg_replace(self::$rule, '', $param);
+				$str = htmlspecialchars($str);
+				return $str;
+			}
+		}catch(\Exception $e){
+			Log::instance()->notice($e->getMessage());
+			View::showErr([
+				'code'=> InteralEnum::ERR_COMMON,
+				'title'=> InteralEnum::ERR_EXCEPTION_TITLE,
+				'content'=> $e->getMessage()
+			]);
 		}
 	}
 
@@ -180,27 +195,27 @@ class Request
 	protected function getArgument($key, $default)
 	{
 		$result = null;
-		if(isset($this->arguments[$key])){
-			$result = $this->arguments[$key];
+		if(!empty($key)){
+			if(isset($this->arguments[$key])){
+				$result = $this->arguments[$key];
+			}elseif(!is_null($default)){
+	            $result = $default;
+	        }
 		}
-		if(empty($result) && !is_null($default)){
-            $result = $default;
-        }
         return $result;
 	}
 	
-	static public function __callStatic($method, $arguments)
+	public static function __callStatic($method, $arguments)
 	{
 		$self = self::instance();
-		try{
-			if(method_exists($self, $method)){
-				return call_user_func_array([$self, $method], $arguments);
-			}else{
-				throw new Exception('Method is not exist on static calling way.');
-			}
-		}catch(\Exception $e){
-			Log::instance()->notice($e->getMessage());
-			return $e->getMessage();
+		if(method_exists($self, $method)){
+			return call_user_func_array([$self, $method], $arguments);
+		}else{
+			View::showErr([
+				'code'=> InteralEnum::METHOD_NOT_EXIST,
+				'title'=> 'Method is not exist.',
+				'content'=> 'Method is not exist on static calling way.'
+			]);
 		}
 	}
 }

@@ -264,17 +264,13 @@ class DB
 		return $this->getSql;
 	}
 	
-	static public function __callStatic($method, $arguments)
+	public static function __callStatic($method, $arguments)
 	{
 		$self = self::instance();
-		try{
-			if(method_exists($self, $method)){
-				return call_user_func_array([$self, $method], $arguments);
-			}else{
-				throw new Exception('Method is not exist on static calling way.');
-			}
-		}catch(\Exception $e){
-			Log::instance()->notice($e->getMessage());
+		if(method_exists($self, $method)){
+			return call_user_func_array([$self, $method], $arguments);
+		}else{
+			exit('Method is not exist on static calling way.');
 		}
 	}
 }

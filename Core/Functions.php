@@ -1,9 +1,10 @@
 <?php
 
-use Config\appConfig;
 use Core\{Config, View};
 
-
+/**
+* helper functions
+*/
 if(!function_exists('config')){
 	/**
 	* get config item

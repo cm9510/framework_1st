@@ -1,6 +1,8 @@
 <?php
+
 use Core\{Config, Route};
-use Core\Sexy_mvc\View;
+use Core\sexy\View;
+use Core\Common\InteralEnum;
 
 /**
  * Launch work...
@@ -8,24 +10,16 @@ use Core\Sexy_mvc\View;
 class Start
 {
 	// self
-	static private $instance = NULL;
+	private static $instance = NULL;
 
 	private function __construct(){}
 
 	private function __clone(){}
 
 	/**
-	* get app debug
-	*/
-	static private function debug()
-	{
-		return Config::get('app.app_debug');
-	}
-
-	/**
 	* Craete self single object.
 	*/
-	static public function app()
+	public static function app()
 	{
 		if(self::$instance && self::$instance instanceof self){
 			return self::$instance;
@@ -35,17 +29,26 @@ class Start
 	}
 
 	/**
+	* get app debug
+	*/
+	private function debug()
+	{
+		return Config::get('app.app_debug');
+	}
+
+	/**
 	* start work.
 	*/
 	public function launch()
 	{
-		self::checkIsRegisterRule(self::getUrlInfo());
+		$this->checkIsRegisterRule($this->getUrlInfo());
+		return false;
 	}
 
 	/**
 	* Get url information. 
 	*/
-	static private function getUrlInfo()
+	private function getUrlInfo()
 	{
 		// get uri.
 		if(isset($_SERVER['PATH_INFO'])){
@@ -64,32 +67,32 @@ class Start
 	/**
 	* Check the url rule has been registed.
 	*/
-	static private function checkIsRegisterRule(string $rule)
+	private function checkIsRegisterRule(string $rule)
 	{
 
 		$check = Route::check($rule);
 		if(!$check){
-			self::notRegistedUrl($rule);
+			$this->notRegistedUrl($rule);
 		}else{
-			self::hasRegistedUrl($check);
+			$this->hasRegistedUrl($check);
 		}
-		return NUll;
+		return false;
 	}
 
 	/**
 	* Do action if the url rule has been registed.
 	*/
-	static private function hasRegistedUrl(array $appAction)
+	private function hasRegistedUrl(array $appAction)
 	{
 		$controller = 'App\\Controller\\'.$appAction['module'].'\\'.$appAction['controller'];
-		$action = $appAction['action'];
-		self::callFunction($controller, $action);
+		$this->callFunction($controller, $appAction['action']);
+		return false;
 	}
 
 	/**
 	* Do action if the url rule not registed.
 	*/
-	static private function notRegistedUrl(string $uri)
+	private function notRegistedUrl(string $uri)
 	{
 		if($uri === '/'){
 			$module = 'App\\Controller\\' . ucfirst(Config::get('app.default_module'));
@@ -101,46 +104,34 @@ class Start
 			$controller = isset($urlArr[2]) ?
 				(empty($urlArr[2]) ? $module.'\\'.ucfirst(Config::get('app.default_controller')) : $module.'\\'.ucfirst($urlArr[2])) :
 				$module.'\\'.ucfirst(Config::get('app.default_controller'));
-
 			$action = isset($urlArr[3]) ?
 				(empty($urlArr[3]) ? ucfirst(Config::get('app.default_action')) : $urlArr[3]) :
 				Config::get('app.default_action');
 		}
-		self::callFunction($controller, $action);
+		unset($module);
+		$this->callFunction($controller, $action);
+		return false;
 	}
 
 	/**
 	* Calling method from class.
 	*/
-	static private function callFunction(string $controller, string $action)
+	private function callFunction(string $controller, string $action)
 	{
 		if(!class_exists($controller)){
-			if(self::debug()){
-				View::bind([
-					'code' => 404,
-					'title' => 'Controller not found.',
-					'content' => '1.Controller "'.$controller.'" not found'
-				]);
-				View::show('lib/error');
-				exit;
-			}else{
-				exit('Controller not found.');
-			}
+			View::showErr([
+				'code'=> InteralEnum::CONTROLLER_NOT_EXIST,
+				'title' => 'Controller not found.',
+				'content' => 'Controller "'.$controller.'" not found'
+			]);
 		}
-
 		$class = new $controller();
 		if(!method_exists($class, $action)){
-			if(self::debug()){
-				View::bind([
-					'code' => 404,
-					'title' => 'Method not found.',
-					'content' => '1.Method "'.$action.'" not found in controller "'.get_class($class).'".'
-				]);
-				View::show('lib/error');
-				exit;
-			}else{
-				exit('Method not found.');
-			}
+			View::showErr([
+				'code' => InteralEnum::METHOD_NOT_EXIST,
+				'title' => 'Method not found.',
+				'content' => '1.Method "'.$action.'" not found in controller "'.get_class($class).'".'
+			]);
 		}
 		return call_user_func_array([$class, $action], []);
 	}

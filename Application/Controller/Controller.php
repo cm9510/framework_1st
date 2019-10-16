@@ -1,7 +1,7 @@
 <?php 
 namespace App\Controller;
 
-use Core\Sexy_mvc\Controller as Base;
+use Core\sexy\Controller as Base;
 
 /**
  * 基类
