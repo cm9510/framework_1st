@@ -1,8 +1,5 @@
-
 <?php
 // router url
-use Core\Route;
+use \Core\Route;
 
-Route::get('/admin', 'Index/Index/index');
-
-
+Route::get('/admin', 'index\Index\index');

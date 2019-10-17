@@ -8,7 +8,7 @@
 .err-head,.err-body{margin:10px auto;width:80%;padding:5px;}
 .err-head{border:2px pink solid;}
 .err-body{border:1px gray solid;}
-.title-overview{color: red;font-size:32px;}
+.title-overview{color: red;font-size:24px;}
 .content-desc{font-size:20px;}
 .content-desc span{color:red;}
 </style>

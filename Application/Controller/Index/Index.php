@@ -3,7 +3,7 @@ namespace App\Controller\Index;
 
 use Core\sexy\View;
 use App\Controller\Controller;
-use Core\{Log, Config, Request};
+use Core\{Log, Config, Request, DB};
 
 class Index extends Controller
 {
@@ -16,11 +16,15 @@ class Index extends Controller
 
 	public function test()
 	{
-		dd(Config::get('app'));
+		dd(config('app.app_debug'));
 		// $request = Request::instance();
 		// $id = $request->input(['sd']);
 		// var_dump($id['sd']);
 		// Log::notice('466');
 	}
-}
 
+	public function test1()
+	{
+		echo gettype(true);
+	}
+}

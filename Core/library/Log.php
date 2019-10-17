@@ -1,7 +1,7 @@
 <?php 
 namespace Core;
 
-use Core\Common\InternalEnum;
+use Internal\InternalEnum;
 /**
  * write log
  */

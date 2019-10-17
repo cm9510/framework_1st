@@ -3,7 +3,7 @@ namespace Core;
 
 use Core\Log;
 use Core\sexy\View;
-use Core\Common\InteralEnum;
+use Core\Common\InternalEnum;
 
 /**
  * Rule of rute register
@@ -43,15 +43,15 @@ class Route
 		try{
 			$appAction = self::$getRule[$rule];
 			if(strtoupper($_SERVER['REQUEST_METHOD']) != $appAction['method']){
-				throw new Exception("Request Method Error.", 1);
+				throw new \Exception("Request Method Error.", 1);
 			}
-			$mca = explode('/', $appAction['mca']);
-			return ['module' => $mca[0], 'controller' => $mca[1], 'action' => $mca[2]];
+			$mca = explode('\\', $appAction['mca']);
+			return ['module'=> ucfirst($mca[0]), 'controller'=> ucfirst($mca[1]), 'action'=> $mca[2]];
 		}catch(\Exception $e){
 			Log::instance()->notice($e->getMessage());
 			View::showErr([
-				'code'=> InteralEnum::ERR_COMMON,
-				'title'=> InteralEnum::ERR_ERROR_TITLE,
+				'code'=> InternalEnum::ERR_COMMON,
+				'title'=> InternalEnum::ERR_ERROR_TITLE,
 				'content'=> $e->getMessage()
 			]);
 		}
@@ -64,7 +64,7 @@ class Route
 			return call_user_func_array([$self, $method], $arguments);
 		}else{
 			View::showErr([
-				'code'=> InteralEnum::METHOD_NOT_EXIST,
+				'code'=> InternalEnum::METHOD_NOT_EXIST,
 				'title'=> 'Method is not exist.',
 				'content'=> 'Method is not exist on static calling way.'
 			]);

@@ -2,7 +2,7 @@
 
 return [
 	// app name
-	'app_name' => '****PHP',
+	'app_name' => 'Framework',
 
 	// app debug
 	'app_debug' => true,
@@ -14,5 +14,8 @@ return [
 	'default_controller' => 'Index',
 	
 	// default_action
-	'default_action' => 'index'
+	'default_action' => 'index',
+
+	//
+	'tpl_suffix' => '.php'
 ];

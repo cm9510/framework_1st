@@ -13,16 +13,17 @@ class AutoLoader
 		'App' => __DIR__ . '/../Application',
 		'Route' => __DIR__ . '/../Route',
 		'Core' => __DIR__ . '/../Core/library',
-		'Core\\Common' => __DIR__ . '/../Core/common',
-		'' => __DIR__ . '/'
+		'Internal' => __DIR__ . '/../Core/common',
+		'' => __DIR__ . '/',
+		'\\' => ''
 	];
 
 	public static function autoload($class)
 	{
-		$top = substr($class, 0, strpos($class, '\\'));
+		$top = substr($class, 0, strpos($class, "\\"));
 		$topDir = self::$mvcMap[$top];
 		$path = substr($class, strlen($top)) . '.php';
-		$file = strtr($topDir . $path, '\\', '/');
+		$file = strtr($topDir . $path, "\\", '/');
 
 		if(file_exists($file) && is_file($file)){
 			include_once $file;

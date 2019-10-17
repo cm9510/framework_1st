@@ -100,7 +100,7 @@ class Request
 	{
 		try{
 			if(!is_array($keys)){
-				throw new Exception("Method 'input' argument 1 type should be Array.", 1);
+				throw new \Exception("Method 'input' argument 1 type should be Array.", 1);
 			}
 
 			$result = [];
@@ -119,8 +119,8 @@ class Request
 		}catch(\Exception $e){
 			Log::instance()->notice($e->getMessage());
 			View::showErr([
-				'code'=> InteralEnum::ERR_COMMON,
-				'title'=> InteralEnum::ERR_EXCEPTION_TITLE,
+				'code'=> InternalEnum::ERR_COMMON,
+				'title'=> InternalEnum::ERR_EXCEPTION_TITLE,
 				'content'=> $e->getMessage()
 			]);
 		}
@@ -173,7 +173,7 @@ class Request
 				return $param;
 			}
 			if(!is_string($param)){
-				throw new Exception("Paramaters is Illeagel.", 1);
+				throw new \Exception("Paramaters is Illeagel.", 1);
 			}else{
 				$str = preg_replace(self::$rule, '', $param);
 				$str = htmlspecialchars($str);
@@ -182,8 +182,8 @@ class Request
 		}catch(\Exception $e){
 			Log::instance()->notice($e->getMessage());
 			View::showErr([
-				'code'=> InteralEnum::ERR_COMMON,
-				'title'=> InteralEnum::ERR_EXCEPTION_TITLE,
+				'code'=> InternalEnum::ERR_COMMON,
+				'title'=> InternalEnum::ERR_EXCEPTION_TITLE,
 				'content'=> $e->getMessage()
 			]);
 		}
@@ -212,7 +212,7 @@ class Request
 			return call_user_func_array([$self, $method], $arguments);
 		}else{
 			View::showErr([
-				'code'=> InteralEnum::METHOD_NOT_EXIST,
+				'code'=> InternalEnum::METHOD_NOT_EXIST,
 				'title'=> 'Method is not exist.',
 				'content'=> 'Method is not exist on static calling way.'
 			]);

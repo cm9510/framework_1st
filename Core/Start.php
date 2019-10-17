@@ -1,8 +1,7 @@
 <?php
-
-use Core\{Config, Route};
-use Core\sexy\View;
-use Core\Common\InteralEnum;
+use \Core\Route;
+use \Core\sexy\View;
+use \Internal\InternalEnum;
 
 /**
  * Launch work...
@@ -33,7 +32,7 @@ class Start
 	*/
 	private function debug()
 	{
-		return Config::get('app.app_debug');
+		return config('app.app_debug');
 	}
 
 	/**
@@ -85,7 +84,7 @@ class Start
 	private function hasRegistedUrl(array $appAction)
 	{
 		$controller = 'App\\Controller\\'.$appAction['module'].'\\'.$appAction['controller'];
-		$this->callFunction($controller, $appAction['action']);
+		$this->callFunction($controller, $appAction['action'], true);
 		return false;
 	}
 
@@ -93,45 +92,63 @@ class Start
 	* Do action if the url rule not registed.
 	*/
 	private function notRegistedUrl(string $uri)
-	{
+	{	
+		$defController = ucfirst(config('app.default_controller'));
+		$defAction = config('app.default_action');
 		if($uri === '/'){
-			$module = 'App\\Controller\\' . ucfirst(Config::get('app.default_module'));
-			$controller = $module . '\\' . ucfirst(Config::get('app.default_controller'));
-			$action = Config::get('app.default_action');
+			$module = 'App\\Controller\\' . ucfirst(config('app.default_module'));
+			$controller = $module . '\\' . $defController;
+			$action = $defAction;
 		}else{
 			$urlArr = explode('/', $uri);
-			$module = 'App\\Controller\\'.ucfirst($urlArr[1]);
+			$module = 'App\\Controller\\' . ucfirst($urlArr[1]);
 			$controller = isset($urlArr[2]) ?
-				(empty($urlArr[2]) ? $module.'\\'.ucfirst(Config::get('app.default_controller')) : $module.'\\'.ucfirst($urlArr[2])) :
-				$module.'\\'.ucfirst(Config::get('app.default_controller'));
-			$action = isset($urlArr[3]) ?
-				(empty($urlArr[3]) ? ucfirst(Config::get('app.default_action')) : $urlArr[3]) :
-				Config::get('app.default_action');
+				(empty($urlArr[2]) ? $module.'\\'.$defController : $module.'\\'.ucfirst($urlArr[2])) :
+				$module . '\\' . $defController;
+			$action = isset($urlArr[3]) ? (empty($urlArr[3]) ? $defAction : $urlArr[3]) : $defAction;
 		}
-		unset($module);
-		$this->callFunction($controller, $action);
+		unset($defController, $defAction, $module);
+		$this->callFunction($controller, $action, false);
 		return false;
 	}
 
 	/**
 	* Calling method from class.
 	*/
-	private function callFunction(string $controller, string $action)
+	private function callFunction(string $controller, string $action, bool $isRule)
 	{
 		if(!class_exists($controller)){
-			View::showErr([
-				'code'=> InteralEnum::CONTROLLER_NOT_EXIST,
-				'title' => 'Controller not found.',
-				'content' => 'Controller "'.$controller.'" not found'
-			]);
+			$controller = explode("\\", $controller);
+			$controller = end($controller);
+			if($isRule){
+				View::showErr([
+					'code'=> InternalEnum::CONTROLLER_NOT_EXIST,
+					'title' => 'Controller not found.',
+					'content' => 'Controller "'.$controller.'" not found'
+				]);
+			}else{
+				View::showErr([
+					'code'=> InternalEnum::URL_RULE_ERR,
+					'title' => 'Routing errors.',
+					'content' => 'Routing errors, cause the controller not found.'
+				]);
+			}
 		}
 		$class = new $controller();
 		if(!method_exists($class, $action)){
-			View::showErr([
-				'code' => InteralEnum::METHOD_NOT_EXIST,
-				'title' => 'Method not found.',
-				'content' => '1.Method "'.$action.'" not found in controller "'.get_class($class).'".'
-			]);
+			if($isRule){
+				View::showErr([
+					'code' => InternalEnum::METHOD_NOT_EXIST,
+					'title' => 'Method not found.',
+					'content' => 'Method "'.$action.'" not found in controller "'.get_class($class).'".'
+				]);
+			}else{
+				View::showErr([
+					'code' => InternalEnum::URL_RULE_ERR,
+					'title' => 'Routing errors.',
+					'content' => 'Routing errors, cause the method not found in controller "'.get_class($class).'".'
+				]);
+			}
 		}
 		return call_user_func_array([$class, $action], []);
 	}

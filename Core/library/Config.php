@@ -9,7 +9,7 @@ use Core\sexy\View;
 class Config
 {
 	// All config file.
-	private $configFile = null;
+	private static $configFile = null;
 
 	private function __construct(){}
 
@@ -25,12 +25,12 @@ class Config
 			return null;
 		}
 		$result = null;
-		$this->requireConfigFile(__DIR__ . '/../../Config/');
+		self::requireConfigFile(__DIR__ . '/../../Config/');
 		if(!strpos($config, '.')){
-			$result = $this->getSimpleConfig($config, $default);
+			$result = self::getSimpleConfig($config, $default);
 		}else{
 			$confDir = explode('.', $config);
-			$result = $this->getMultiConfig($confDir, $default);
+			$result = self::getMultiConfig($confDir, $default);
 			unset($confDir);
 		}
 		return $result;
@@ -43,12 +43,10 @@ class Config
 	{
 		$result = null;
 		if(!empty($config)){
-			if(isset($this->configFile[$config])){
-				$result = $this->configFile[$config];
+			if(isset(self::$configFile[$config])){
+				$result = self::$configFile[$config];
 			}elseif(!is_null($default)){
 				$result = $default;
-			}else{
-				$result = null;
 			}
 		}
 		return $result;
@@ -68,8 +66,8 @@ class Config
 			}
 			foreach ($configArr as $key) {
 				if(empty($result)){
-					if(isset($this->configFile[$key])){
-						$result = $this->configFile[$key];
+					if(isset(self::$configFile[$key])){
+						$result = self::$configFile[$key];
 					}elseif(!is_null($default)){
 						$result = $default;
 					}
@@ -91,11 +89,11 @@ class Config
 	*/
 	protected function requireConfigFile(string $dir)
 	{
-		if(is_null($this->configFile)){
+		if(is_null(self::$configFile)){
 			$handle = opendir($dir);
 			$result = [];
 			while (false !== ($file = readdir($handle))) {
-				if($file != '.' && $file != '..'){
+				if($file != '.' && $file != '..' && $file != '.gitignore'){
 					$filepath = $dir.'/'.$file;
 					if(filetype($filepath) == 'dir'){
 						echo $filepath;
@@ -108,7 +106,7 @@ class Config
 				}
 			}
 			closedir($handle);
-			$this->configFile = $result;
+			self::$configFile = $result;
 		}
 		return null;
 	}
@@ -120,7 +118,7 @@ class Config
 			return call_user_func_array([$self, $method], $arguments);
 		}else{
 			View::showErr([
-				'code'=> InteralEnum::METHOD_NOT_EXIST,
+				'code'=> InternalEnum::METHOD_NOT_EXIST,
 				'title'=> 'Method is not exist.',
 				'content'=> 'Method is not exist on static calling way.'
 			]);

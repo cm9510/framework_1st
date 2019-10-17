@@ -1,6 +1,6 @@
 <?php
 
-use Core\{Config, View};
+use Core\{Config, View, Route};
 
 /**
 * helper functions
