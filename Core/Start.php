@@ -16,7 +16,7 @@ class Start
 	private function __clone(){}
 
 	/**
-	* Craete self single object.
+	* Create self single object.
 	*/
 	public static function app()
 	{
@@ -25,14 +25,6 @@ class Start
 		}
 		self::$instance = new self;
 		return self::$instance;
-	}
-
-	/**
-	* get app debug
-	*/
-	private function debug()
-	{
-		return config('app.app_debug');
 	}
 
 	/**

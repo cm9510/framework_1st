@@ -25,7 +25,7 @@ class Log
 	}
 
 	// Write log to doc txt.
-	public function notice(string $text)
+	public function notice($text)
 	{
 		$logFile = __DIR__.'/../../Storage/logs'.date('Ymd').'.txt';
 		if(!file_exists($logFile)){
@@ -49,5 +49,6 @@ class Log
 				'content' => 'Method is not exist on static calling way.'
 			]);
 		}
+		exit;
 	}
 }

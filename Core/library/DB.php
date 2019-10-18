@@ -1,6 +1,7 @@
 <?php 
 namespace Core;
 
+use Core\sexy\View;
 use Core\{Config, Log};
 use Internal\InternalEnum;
 
@@ -71,7 +72,7 @@ class DB
 		return $this;
 	}
 
-	// excute a sql string
+	// execute sql string
 	public function query(string $sql)
 	{
 		try{
@@ -91,7 +92,7 @@ class DB
 	}
 
 	// select，二维数组
-	public function select():array
+	public function select()
 	{
 		$finalSql = 'SELECT' . $this->cols . 'FROM' . $this->table . $this->where .
 					$this->orderBy . $this->limit;
@@ -102,27 +103,33 @@ class DB
 	}
 
 	// insert only
-	public function insert(array $arr)
+	public function insert(array $arr, $getId = false)
 	{
 		if(!is_array($arr)){
-			return '插入数据必须是数组.';
+			exit('插入数据必须是数组.');
 		}
 
 		$columns = '';
 		$values = '';
+		$data = [];
 		foreach ($arr as $col => $val) {
 			$columns .= '`'.$col.'`,';
-			$values .= "'".$val."',";
+			$values .= '?,';
+			array_push($data, $val);
 		}
-		$columns = trim($columns, ',');
-		$values = trim($values, ',');
+		$columns = rtrim($columns, ',');
+		$values = rtrim($values, ',');
 
-		$finalSql = 'INSERT INTO'.$this->table.'('.$columns.') VALUES('.$values.')';
-		$this->getSql = $finalSql;
+		$sql = 'INSERT INTO'.$this->table.'('.$columns.') VALUES('.$values.')';
+		$this->getSql = $sql;
 
 		try {
-			$row = $this->dbh->exec($finalSql);
-			return $row ? $row : 0;
+			$stmt = $this->dbh->prepare($sql);
+			$result = $stmt->execute($data);
+			if($result && $getId){
+				$result = $stmt->lastInsertId();
+			}
+			return $result;
 		} catch (\PDOException $e) {
 			Log::instance()->notice($e->getMessage());
 			return false;
@@ -159,12 +166,12 @@ class DB
 			try {
 				$row = $this->dbh->exec($finalSql);
 				return $row;
-			} catch (PDOException $e) {
+			} catch (\PDOException $e) {
 				Log::instance()->notice($e->getMessage());
 				return false;
 			}
 		}
-	return $result;
+		return $result;
 	}
 
 	// 更新
@@ -186,7 +193,7 @@ class DB
 		try {
 			$row = $this->dbh->exec($finalSql);
 			return $row;
-		} catch (PDOException $e) {
+		} catch (\PDOException $e) {
 			Log::instance()->notice($e->getMessage());
 			return $e->getMessage();
 		}
@@ -275,7 +282,7 @@ class DB
 	}
 
 	// limit trunck
-	public function limit($start = 1, $takes)
+	public function limit($takes, $start = 1)
 	{
 		$this->limit = ' LIMIT '.($start-1).', '.$takes;
 	}
@@ -283,7 +290,7 @@ class DB
 	// 获取SQL语句
 	public function getSql()
 	{
-		dd($this->getSql);
+		return $this->getSql;
 	}
 	
 	public static function __callStatic($method, $arguments)
@@ -298,5 +305,6 @@ class DB
 				'content'=> 'Method is not exist on static calling way.'
 			]);
 		}
+		exit;
 	}
 }

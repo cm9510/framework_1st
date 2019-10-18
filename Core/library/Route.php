@@ -1,20 +1,30 @@
 <?php 
 namespace Core;
 
-use Core\Log;
 use Core\sexy\View;
-use Core\Common\InternalEnum;
+use Internal\InternalEnum;
 
 /**
- * Rule of rute register
+ * Rule of route register
  */
 class Route
 {
+    private static $instance = null;
+
 	private function __construct(){}
 
 	private function __clone(){}
 
 	private static $getRule = [];
+
+	public static function instance()
+    {
+        if(self::$instance && self::$instance instanceof self){
+            return self::$instance;
+        }
+        self::$instance = new self;
+        return self::$instance;
+    }
 
 	// sign get url
 	public static function get(string $routeRule, string $appAction)
@@ -69,6 +79,7 @@ class Route
 				'content'=> 'Method is not exist on static calling way.'
 			]);
 		}
+        exit;
 	}
 }
 

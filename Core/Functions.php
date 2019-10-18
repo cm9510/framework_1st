@@ -9,9 +9,9 @@ if(!function_exists('config')){
 	/**
 	* get config item
 	*/
-	function config(string $config)
+	function config(string $config, $default = null)
 	{
-		return Config::get($config);
+		return Config::get($config, $default);
 	}
 }
 if(!function_exists('e')){

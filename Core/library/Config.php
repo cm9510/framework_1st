@@ -2,12 +2,14 @@
 namespace Core;
 
 use Core\sexy\View;
+use Internal\InternalEnum;
 
 /**
  * config
  */
 class Config
 {
+    private static $instance = null;
 	// All config file.
 	private static $configFile = null;
 
@@ -15,10 +17,19 @@ class Config
 
 	private function __clone(){}
 
+    // Get self
+    public static function instance()
+    {
+        if(self::$instance && self::$instance instanceof self){
+            return self::$instance;
+        }
+        self::$instance = new self;
+        return self::$instance;
+    }
 	/**
 	* Get config item.
 	*/
-	public function get(string $config = '', $default = null)
+	public function get($config = '', $default = null)
 	{
 		$config = strtolower(trim($config));
 		if(empty($config)){
@@ -61,7 +72,7 @@ class Config
 		if(!empty($configArr)){
 			try{
 
-			}catch(\Exeception $e){
+			}catch(\Exception $e){
 
 			}
 			foreach ($configArr as $key) {
@@ -96,8 +107,7 @@ class Config
 				if($file != '.' && $file != '..' && $file != '.gitignore'){
 					$filepath = $dir.'/'.$file;
 					if(filetype($filepath) == 'dir'){
-						echo $filepath;
-						requireConfigFile($filepath);
+						$this->requireConfigFile($filepath);
 					}else{
 						$confName = explode('.', $file)[0];
 						$conf = require $filepath;
@@ -123,5 +133,6 @@ class Config
 				'content'=> 'Method is not exist on static calling way.'
 			]);
 		}
+        exit;
 	}
 }

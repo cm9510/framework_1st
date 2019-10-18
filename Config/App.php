@@ -16,6 +16,6 @@ return [
 	// default_action
 	'default_action' => 'index',
 
-	//
+	// template_suffix
 	'tpl_suffix' => '.php'
 ];

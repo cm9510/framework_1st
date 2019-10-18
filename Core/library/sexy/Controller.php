@@ -1,13 +1,12 @@
 <?php 
 namespace Core\sexy;
 
-use Core\sexy\View;
 /*
 * Model Builder
 */
 class Controller
 {
-	public function view(string $tpl = '', array $data = [])
+	public function view($tpl = '', array $data = [])
 	{
 		if(empty($tpl)){
 			$module = get_class($this);

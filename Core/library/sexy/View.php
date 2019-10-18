@@ -8,7 +8,7 @@ use Internal\InternalEnum;
 class View
 {
 	// class self
-	private $instance = null;
+	private static $instance = null;
 
 	// error code
 	protected $errCode = 000;

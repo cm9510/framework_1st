@@ -1,9 +1,8 @@
 <?php 
 namespace Core;
 
-use Core\Log;
 use Core\sexy\View;
-
+use Internal\InternalEnum;
 /***
  * Request builder
  */
@@ -87,7 +86,7 @@ class Request
 	*/
 	public function all()
 	{
-		if($this->isGet() || $thi->isPost()){
+		if($this->isGet() || $this->isPost()){
 			return $this->arguments;
 		}
 		return [];
@@ -187,7 +186,8 @@ class Request
 				'content'=> $e->getMessage()
 			]);
 		}
-	}
+        exit;
+    }
 
 	/**
 	* Throw the one argument.
@@ -217,5 +217,6 @@ class Request
 				'content'=> 'Method is not exist on static calling way.'
 			]);
 		}
-	}
+        exit;
+    }
 }

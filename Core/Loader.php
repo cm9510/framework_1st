@@ -1,7 +1,7 @@
 <?php 
 
 /**
- * 类的自动加载
+ * autoload class
  */
 class AutoLoader
 {
